@@ -1,8 +1,10 @@
-package main
+package pkg
 
 import (
+	"errors"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 type Error struct {
@@ -44,5 +46,19 @@ func NewErrMethodNotAllowed() *Error {
 		StatusCode: http.StatusMethodNotAllowed,
 		ErrCode:    "ERR_METHOD_NOT_ALLOWED",
 		Message:    "method is not allowed",
+	}
+}
+
+func NewErrorResp(err error) ApiResp {
+	var e *Error
+	if !errors.As(err, &e) {
+		e = NewErrInternalError(err)
+	}
+	return ApiResp{
+		StatusCode: e.StatusCode,
+		OK:         false,
+		ErrCode:    e.ErrCode,
+		Message:    e.Message,
+		Timestamp:  time.Now().Unix(),
 	}
 }
